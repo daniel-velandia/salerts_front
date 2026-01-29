@@ -5,19 +5,18 @@ export const usePermissions = () => {
   const { user } = useAppSelector((state) => state.auth);
 
   const hasPermission = (permission: Permission): boolean => {
-    // if (!user || !user.roles) return false;
+    if (!user || !user.roles) return false;
 
-    // // Check if user has the exact permission
-    // if (user.roles.includes(permission)) return true;
+    // Check if user has the exact permission
+    if (user.roles.includes(permission)) return true;
 
-    // // Logic: WRITE implies READ
-    // if (permission.endsWith("_READ")) {
-    //   const writePermission = permission.replace("_READ", "_WRITE") as Permission;
-    //   if (user.roles.includes(writePermission)) return true;
-    // }
+    // Logic: WRITE implies READ
+    if (permission.endsWith("_READ")) {
+      const writePermission = permission.replace("_READ", "_WRITE") as Permission;
+      if (user.roles.includes(writePermission)) return true;
+    }
 
-    // return false;
-    return true;
+    return false;
   };
 
   /**
@@ -27,8 +26,7 @@ export const usePermissions = () => {
   const canView = (permissionBase: string): boolean => {
       const readPerm = `${permissionBase}_READ` as Permission;
       const writePerm = `${permissionBase}_WRITE` as Permission;
-      // return hasPermission(readPerm) || hasPermission(writePerm);
-      return true;
+      return hasPermission(readPerm) || hasPermission(writePerm);
   }
 
   return { hasPermission, canView };

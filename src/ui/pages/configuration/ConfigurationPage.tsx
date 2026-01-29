@@ -17,7 +17,7 @@ import { PermissionGuard } from "@/ui/components/auth/PermissionGuard";
 export function ConfigurationPage() {
   const { hasPermission } = usePermissions();
 
-  if (!hasPermission(PERMISSIONS.CONFIGURATION_READ)) {
+  if (!hasPermission(PERMISSIONS.CONFIGURATION_WRITE)) {
     return <Navigate to="/" replace />;
   }
 

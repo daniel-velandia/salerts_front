@@ -30,7 +30,9 @@ export function GradeManagement() {
     handleEditChange,
     saveChanges,
     cancelChanges,
-    getValue
+    getValue,
+    downloadGrades,
+    isDownloading,
   } = useGradeManagement();
 
   return (
@@ -45,8 +47,13 @@ export function GradeManagement() {
         <div className="flex gap-2">
           {!isAssigning ? (
             <>
-              <Button variant="outline">
-                <FileText className="w-4 h-4 mr-2" /> Reportes
+              <Button 
+                variant="outline" 
+                onClick={downloadGrades}
+                disabled={isDownloading || !filters.groupId || filters.groupId === 'all'}
+              >
+                <FileText className="w-4 h-4 mr-2" /> 
+                {isDownloading ? "Descargando..." : "Reportes"}
               </Button>
               <PermissionGuard permission={PERMISSIONS.GRADES_WRITE}>
                 <Button onClick={() => setIsAssigning(true)}>

@@ -43,7 +43,7 @@ export const menuItems: MenuItem[] = [
     title: "Configuración",
     url: "/configuration",
     icon: Settings,
-    permissions: ["CONFIGURATION_WRITE", "CONFIGURATION_READ"],
+    permissions: ["CONFIGURATION_WRITE"],
   },
   {
     title: "Grupos",

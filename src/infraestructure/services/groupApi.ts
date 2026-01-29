@@ -2,14 +2,13 @@ import { apiDelete, apiGet, apiPost, apiPut, createApiCall } from "./config";
 import type { ApiCall } from "@/domain/models/ApiCall";
 import type { Group } from "@/domain/models/Group";
 import type { ScheduleInput, DayOfWeek } from "@/domain/models/Schedule";
-import { parseTimeString } from "@/shared/utils/timeUtils";
 
 // Internal interface matching the backend response
 interface ScheduleBackend {
   id: string;
   day: DayOfWeek;
-  startTime: string;
-  endTime: string;
+  startTime: { hour: number; minute: number; second: number; nano: number };
+  endTime: { hour: number; minute: number; second: number; nano: number };
 }
 
 interface StudentInGroupBackend {
@@ -24,42 +23,38 @@ interface StudentInGroupBackend {
   studentId?: string;
 }
 
-interface GroupBackend extends Omit<Group, 'schedules'> {
+interface GroupBackend {
+  id: string;
+  groupName: string;
+  scheduleDescription: string;
   schedules: ScheduleBackend[];
-  // Backend returns these as objects or we try to extract them
-  period?: { id: string; name: string; active: boolean };
-  subject?: { id: string; name: string; code: string };
-  teacher?: { id: string; name: string };
-  students?: StudentInGroupBackend[];
-  // Sometimes IDs might be at root
-  subjectId?: string;
-  teacherId?: string;
-  periodId?: string;
+  period: { id: string; name: string; active: boolean };
+  subject: { id: string; name: string; code: string; credits: number; programId: string };
+  teacher: { id: string; fullName: string; email: string };
+  students: StudentInGroupBackend[];
 }
 
 // Mapper function
 const mapGroupFromBackend = (group: GroupBackend): Group => ({
-  ...group,
-  // Map IDs if objects exist, or fallback to root IDs if present
-  periodId: group.period?.id || group.periodId,
-  subjectId: group.subject?.id || group.subjectId,
-  teacherId: group.teacher?.id || group.teacherId,
-  // Map students to IDs (using 'id' or 'studentId', falling back to empty if not found)
-  // note: The form expects student IDs from the 'availableStudents' list. 
-  // If the backend list only has enrollmentId, we might fail to match unless we fetch enrollments.
-  // We will try to map whatever ID looks like a student ID.
-  studentIds: group.students?.map(s => s.studentId || s.id || '').filter(Boolean) || [],
-  // We map enrolled students to a list containing their emails and enrollment IDs for tracking unenrollments
+  id: group.id,
+  groupName: group.groupName,
+  subjectName: group.subject.name,
+  teacherName: group.teacher.fullName,
+  scheduleDescription: group.scheduleDescription,
+  periodId: group.period.id,
+  subjectId: group.subject.id,
+  teacherId: group.teacher.id,
+  studentIds: group.students?.map(s => s.id || '').filter(Boolean) || [],
   enrolledStudents: group.students?.map(s => ({
     enrollmentId: s.enrollmentId,
-    studentId: s.studentId || s.id,
+    studentId: s.id,
     email: s.email
   })) || [],
-
   schedules: (group.schedules || []).map(s => ({
-    ...s,
-    startTime: parseTimeString(s.startTime),
-    endTime: parseTimeString(s.endTime)
+    id: s.id,
+    day: s.day,
+    startTime: s.startTime,
+    endTime: s.endTime
   }))
 });
 

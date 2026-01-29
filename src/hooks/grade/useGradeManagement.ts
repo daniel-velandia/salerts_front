@@ -6,7 +6,7 @@ import type {
   GradeFiltersState,
 } from "@/domain/models/Grade";
 import { useApi } from "@/hooks/common/useApi";
-import { getGradesByGroup, updateGrade } from "@/infraestructure/services/gradeApi";
+import { getGradesByGroup, updateGrade, exportGrades } from "@/infraestructure/services/gradeApi";
 import { getAllGroups } from "@/infraestructure/services/groupApi";
 import { getAllStaff } from "@/infraestructure/services/staffApi";
 import { useAppDispatch } from "@/infraestructure/store/hooks";
@@ -71,6 +71,7 @@ export const useGradeManagement = () => {
   // --- 2. Estado Local (UI & Edición) ---
   const [localGrades, setLocalGrades] = useState<Grade[]>([]);
   const [isAssigning, setIsAssigning] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [editedGrades, setEditedGrades] = useState<
     Record<string, Partial<GradeEditableFields>>
   >({});
@@ -214,5 +215,25 @@ export const useGradeManagement = () => {
     cancelChanges,
     getValue,
     applyFilters,
+    downloadGrades: async () => {
+      if (!filters.groupId || filters.groupId === 'all') {
+        toast.error("Debes seleccionar un grupo para generar el reporte");
+        return;
+      }
+      
+      try {
+         setIsDownloading(true);
+         dispatch(setLoading(true));
+         await exportGrades(filters.groupId).call;
+         toast.success("Reporte descargado correctamente");
+      } catch (error) {
+        console.error(error);
+        toast.error("Error al descargar el reporte");
+      } finally {
+        setIsDownloading(false);
+        dispatch(setLoading(false));
+      }
+    },
+    isDownloading,
   };
 };
