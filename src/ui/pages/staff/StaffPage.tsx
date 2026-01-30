@@ -71,14 +71,14 @@ export function StaffPage() {
             <AppSelect
               name="programId"
               placeholder="Programa"
-              options={programOptions}
+              options={[{ id: "ALL", label: "Todos los programas" }, ...programOptions]}
             />
           </div>
           <div className="flex-1 w-full lg:w-48">
             <AppSelect
               name="role"
               placeholder="Rol"
-              options={roleOptions}
+              options={[{ id: "ALL", label: "Todos los roles" }, ...roleOptions]}
             />
           </div>
           </div>

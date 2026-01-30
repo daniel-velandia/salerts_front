@@ -4,7 +4,10 @@ import { useAppDispatch } from '@/infraestructure/store/hooks';
 import { setLoading, setError } from '@/infraestructure/store/uiSlice';
 import type { Group } from '@/domain/models/Group';
 import { getAllGroups, type GetGroupsParams } from '@/infraestructure/services/groupApi';
+import { getGlobalOptions } from '@/infraestructure/services/optionsApi';
 import type { GroupFilterParams } from '@/domain/models/groups/GroupFilterParams';
+import type { GlobalOptions } from '@/domain/models/options/GlobalOptions';
+import type { Option } from '@/domain/models/Option';
 
 export function useGroupManagement() {
   const dispatch = useAppDispatch();
@@ -23,41 +26,40 @@ export function useGroupManagement() {
     call: fetchGroups
   } = useApi<Group[], GetGroupsParams>(getAllGroups);
 
-  // Fetch groups whenever filters change (excluding search which is client-side for now, or server-side? existing code mixed them)
-  // Existing code: search was client side. period/subject/teacher were server params.
-  // I should keep search client side if strictly following previous behavior, OR move it to server if API supports it.
-  // The user prompt said "modifica el filtro... para usar AppForm".
-  // StaffPage sends search to server. GroupsPage `getAllGroups` might not support search?
-  // Let's check `GetGroupsParams` imported from `groupApi`.
-  // ListDir showed `groupApi.ts`? No, I need to check `groupApi.ts`.
-  // Assuming `GetGroupsParams` supports what `getAllGroups` accepts.
-  // Existing code:
-  // const params: GetGroupsParams = {};
-  // if (filterPeriod) params.periodId = filterPeriod;
-  // ...
-  // fetchGroups(params);
-  // Search was used in `filteredGroups` memo.
-  // I will keep search client-side for now to avoid breaking if API doesn't support it, unless I check.
-  // Wait, `StaffPage` uses server search.
-  // I will assume for `GroupPage` search is still client side as per previous implementation, but I will put it in `filters` object.
-  
+  const {
+    data: options,
+    loading: loadingOptions,
+    error: errorOptions,
+  } = useApi<GlobalOptions, void>(getGlobalOptions, {
+    autoFetch: true,
+    params: undefined,
+  });
+
+  // Fetch groups whenever filters change - only if at least one filter is applied
   useEffect(() => {
-    const params: GetGroupsParams = {};
-    if (filters.periodId && filters.periodId !== 'ALL') params.periodId = filters.periodId;
-    if (filters.subjectId && filters.subjectId !== 'ALL') params.subjectId = filters.subjectId;
-    if (filters.teacherId && filters.teacherId !== 'ALL') params.teacherId = filters.teacherId;
+    const hasFilters = Object.values(filters).some(v => v !== undefined && v !== "" && v !== "ALL");
     
-    fetchGroups(params);
+    if (hasFilters) {
+      const params: GetGroupsParams = {};
+      if (filters.periodId && filters.periodId !== 'ALL') params.periodId = filters.periodId;
+      if (filters.subjectId && filters.subjectId !== 'ALL') params.subjectId = filters.subjectId;
+      if (filters.teacherId && filters.teacherId !== 'ALL') params.teacherId = filters.teacherId;
+      
+      fetchGroups(params);
+    }
   }, [filters.periodId, filters.subjectId, filters.teacherId, fetchGroups]);
 
   // Sync Global State
   useEffect(() => {
-    dispatch(setLoading(loadingGroups));
+    const isLoading = loadingGroups || loadingOptions;
+    const error = errorGroups || errorOptions;
+
+    dispatch(setLoading(isLoading));
     
-    if (errorGroups && errorGroups.status !== 499) {
-      dispatch(setError(errorGroups, true));
+    if (error && error.status !== 499) {
+      dispatch(setError(error, true));
     }
-  }, [loadingGroups, errorGroups, dispatch]);
+  }, [loadingGroups, loadingOptions, errorGroups, errorOptions, dispatch]);
 
   const applyFilters = (newFilters: GroupFilterParams) => {
     setFilters(prev => ({
@@ -90,6 +92,18 @@ export function useGroupManagement() {
     };
   }, [groups]);
 
+  const periodOptions: Option[] = useMemo(() => 
+    (options?.periods || []).map((p) => ({ id: p.id, label: p.name }))
+  , [options]);
+
+  const subjectOptions: Option[] = useMemo(() => 
+    (options?.subjects || []).map((s) => ({ id: s.id, label: s.name }))
+  , [options]);
+
+  const teacherOptions: Option[] = useMemo(() => 
+    (options?.teachers || []).map((t) => ({ id: t.id, label: t.name }))
+  , [options]);
+
   return {
     groups: groups || [],
     filteredGroups,
@@ -97,6 +111,9 @@ export function useGroupManagement() {
     filters,
     applyFilters,
     statistics,
+    periodOptions,
+    subjectOptions,
+    teacherOptions,
     refresh: () => {
       const params: GetGroupsParams = {};
       if (filters.periodId && filters.periodId !== 'ALL') params.periodId = filters.periodId;

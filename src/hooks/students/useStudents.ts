@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { useApi } from "@/hooks/common/useApi";
-import { getAllStudents, getStudentFilterOptions } from "@/infraestructure/services/studentApi";
+import { getAllStudents } from "@/infraestructure/services/studentApi";
+import { getGlobalOptions } from "@/infraestructure/services/optionsApi";
 import { useAppDispatch } from "@/infraestructure/store/hooks";
 import { setError, setLoading } from "@/infraestructure/store/uiSlice";
 import type { FullStudentData } from "@/domain/models/students/FullStudentData";
 import type { StudentFilterParams } from "@/domain/models/students/StudentFilterParams";
-import type { StudentFilterOptions } from "@/domain/models/students/StudentFilterOptions";
+import type { GlobalOptions } from "@/domain/models/options/GlobalOptions";
 import type { Option } from "@/domain/models/Option";
 import type { StudentFilterFormValues } from "@/domain/schemas/studentFilterSchema";
 
@@ -30,8 +31,9 @@ export const useStudents = (): Result => {
     loading: loadingStudents,
     data: students,
     error: errorStudents,
+    call: fetchStudents
   } = useApi<FullStudentData[], StudentFilterParams>(getAllStudents, {
-    autoFetch: true,
+    autoFetch: false,
     params: filterParams,
   });
 
@@ -39,10 +41,18 @@ export const useStudents = (): Result => {
     loading: loadingOptions,
     data: options,
     error: errorOptions,
-  } = useApi<StudentFilterOptions, void>(getStudentFilterOptions, {
+  } = useApi<GlobalOptions, void>(getGlobalOptions, {
     autoFetch: true,
     params: undefined,
   });
+
+  // Load students only when filters are applied
+  useEffect(() => {
+    const hasFilters = Object.values(filterParams).some(v => v !== undefined && v !== "");
+    if (hasFilters) {
+      fetchStudents(filterParams);
+    }
+  }, [filterParams, fetchStudents]);
 
   useEffect(() => {
     dispatch(setLoading(loadingStudents || loadingOptions));
@@ -57,33 +67,36 @@ export const useStudents = (): Result => {
       scheduleId: filters.scheduleId === "ALL" ? undefined : filters.scheduleId || undefined,
       teacherId: filters.teacherId === "ALL" ? undefined : filters.teacherId || undefined,
     }
-    setQueryParams((prev) => ({ ...prev, ...newFilters }));
+    setQueryParams(newFilters);
   }, []);
 
   const selectStudent = useCallback((student: FullStudentData) => {
     setSelectedStudent(student);
   }, []);
 
-  const programs: Option[] = options?.programs.map((p) => ({ id: p.id, label: p.name })) ?? [];
+  const programs: Option[] = useMemo(() => 
+    (options?.programs.map((p) => ({ id: p.id, label: p.name })) ?? [])
+  , [options]);
 
-  const subjects: Option[] =
-    options?.subjects
-      .filter(
-        (s) =>
-          !filterParams.programId ||
-          s.programIds.includes(filterParams.programId),
-      )
-      .flatMap((s) => s.groups)
-      .map((g) => ({ id: g.id, label: g.label })) ?? [];
+  const subjects: Option[] = useMemo(() => 
+    (options?.groups
+      .filter(g => {
+        if (!filterParams.programId) return true;
+        // Match group's subject with the program
+        const subject = options.subjects.find(s => s.id === g.subjectId);
+        return subject?.programIds.includes(filterParams.programId);
+      })
+      .map((g) => ({ id: g.id, label: g.label })) ?? [])
+  , [options, filterParams.programId]);
 
-  const teachers: Option[] =
-    options?.teachers
-      .filter(
-        (t) =>
-          !filterParams.programId ||
-          t.programIds.includes(filterParams.programId),
+  const teachers: Option[] = useMemo(() => 
+    (options?.teachers
+      .filter((t) =>
+        !filterParams.programId ||
+        t.programIds.includes(filterParams.programId),
       )
-      .map((t) => ({ id: t.id, label: t.name })) ?? [];
+      .map((t) => ({ id: t.id, label: t.name })) ?? [])
+  , [options, filterParams.programId]);
 
   return {
     students: students ?? [],

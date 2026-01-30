@@ -4,9 +4,6 @@ import { Badge } from '@/ui/components/shadcn/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/components/shadcn/card';
 import { useGroupManagement } from '@/hooks/groups/useGroupManagement';
 import { useNavigate, Navigate } from 'react-router-dom';
-import { usePeriodManagement } from '@/hooks/periods/usePeriodManagement';
-import { useSubjectManagement } from '@/hooks/subjects/useSubjectManagement';
-import { useStaffManagement } from '@/hooks/staff/useStaffManagement';
 import { usePermissions } from "@/hooks/auth/usePermissions";
 import { PermissionGuard } from "@/ui/components/auth/PermissionGuard";
 import { PERMISSIONS } from "@/domain/constants/permissions";
@@ -31,11 +28,11 @@ export function GroupsPage() {
     filters,
     applyFilters,
     statistics,
+    periodOptions: rawPeriodOptions,
+    subjectOptions: rawSubjectOptions,
+    teacherOptions: rawTeacherOptions,
   } = useGroupManagement();
 
-  const { periods } = usePeriodManagement();
-  const { subjects } = useSubjectManagement();
-  const { staffList } = useStaffManagement();
   const { hasPermission } = usePermissions();
 
   if (!hasPermission(PERMISSIONS.GROUPS_READ)) {
@@ -44,28 +41,17 @@ export function GroupsPage() {
 
   const periodOptions = [
     { id: 'ALL', label: 'Todos los períodos' },
-    ...periods.map(p => ({
-      label: `${p.name}${p.activeState ? ' (Activo)' : ''}`,
-      id: p.id
-    }))
+    ...rawPeriodOptions
   ];
 
   const subjectOptions = [
     { id: 'ALL', label: 'Todas las materias' },
-    ...subjects.map(s => ({
-      label: s.name,
-      id: s.id
-    }))
+    ...rawSubjectOptions
   ];
 
   const teacherOptions = [
     { id: 'ALL', label: 'Todos los profesores' },
-    ...(staffList || [])
-      .filter(s => s.role === 'TEACHER')
-      .map(s => ({
-        label: `${s.name}`,
-        id: s.id
-      }))
+    ...rawTeacherOptions
   ];
 
   const handleCreateGroup = () => {

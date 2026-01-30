@@ -1,14 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useApi } from "@/hooks/common/useApi";
 import { useAppDispatch } from "@/infraestructure/store/hooks";
 import { setError, setLoading } from "@/infraestructure/store/uiSlice";
 import { getAllSubjects } from "@/infraestructure/services/subjectApi";
-import { getAllPrograms } from "@/infraestructure/services/programApi";
-import type { Program } from "@/domain/models/program/Program";
-import type { Subject } from "@/domain/models/subject/Subject";
+import { getGlobalOptions } from "@/infraestructure/services/optionsApi";
 import { emptySubjectFilterFormValues, type SubjectFilterFormValues } from "@/domain/schemas/subjectFilterSchema";
 import type { Option } from "@/domain/models/Option";
 import type { SubjectFilterParams } from "@/domain/models/subject/SubjectFilterParams";
+import type { Subject } from "@/domain/models/subject/Subject";
+import type { GlobalOptions } from "@/domain/models/options/GlobalOptions";
 
 interface Result {
   subjects: Subject[];
@@ -29,45 +29,48 @@ export const useSubjectManagement = (): Result => {
   } = useApi<Subject[], SubjectFilterParams>(getAllSubjects);
 
   const { 
-    data: programs, 
-    loading: loadingPrograms,
-    error: errorPrograms,
-  } = useApi<Program[], void>(getAllPrograms, {
+    data: options, 
+    loading: loadingOptions,
+    error: errorOptions,
+  } = useApi<GlobalOptions, void>(getGlobalOptions, {
     autoFetch: true,
     params: undefined,
   });
 
   useEffect(() => {
-    const isLoading = loadingSubjects || loadingPrograms;
-    const error = errorSubjects || errorPrograms;
+    const isLoading = loadingSubjects || loadingOptions;
+    const error = errorSubjects || errorOptions;
 
     dispatch(setLoading(isLoading));
     if (error && error.status !== 499)
       dispatch(setError(error));
   }, [
     loadingSubjects,
-    loadingPrograms,
+    loadingOptions,
     errorSubjects,
-    errorPrograms,
+    errorOptions,
     dispatch
   ]);
 
+  // Load subjects only when filters are applied
   useEffect(() => {
-    const paramsToSend: SubjectFilterParams = {
-      programId: filters.programId === "ALL" ? undefined : filters.programId,
-      search: filters.search === "" ? undefined : filters.search
-    };
-    fetchSubjects(paramsToSend);
+    const hasFilters = Object.values(filters).some(v => v !== undefined && v !== "" && v !== "ALL");
+    if (hasFilters) {
+      const paramsToSend: SubjectFilterParams = {
+        programId: filters.programId === "ALL" ? undefined : filters.programId,
+        search: filters.search === "" ? undefined : filters.search
+      };
+      fetchSubjects(paramsToSend);
+    }
   }, [filters, fetchSubjects]);
 
   const applyFilters = (newFilters: SubjectFilterParams) => {
     setFilters((prev) => ({ ...prev, ...newFilters }));
   };
 
-  const programOptions: Option[] = [
-    { id: "ALL", label: "Todos los programas" },
-    ...(programs || []).map((p) => ({ id: p.id, label: p.name })),
-  ];
+  const programOptions: Option[] = useMemo(() => 
+    (options?.programs || []).map((p) => ({ id: p.id, label: p.name }))
+  , [options]);
 
   return {
     subjects: subjects || [],

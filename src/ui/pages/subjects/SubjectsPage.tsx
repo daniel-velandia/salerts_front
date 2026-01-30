@@ -62,7 +62,7 @@ export function SubjectsPage() {
                 <AppSelect
                   name="programId"
                   placeholder="Todos los programas"
-                  options={programOptions}
+                  options={[{ id: "ALL", label: "Todos los programas" }, ...programOptions]}
                 />
               </div>
             </div>
