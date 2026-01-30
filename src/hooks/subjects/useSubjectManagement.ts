@@ -13,6 +13,7 @@ import type { GlobalOptions } from "@/domain/models/options/GlobalOptions";
 interface Result {
   subjects: Subject[];
   programOptions: Option[];
+  subjectOptions: Option[];
   filters: SubjectFilterFormValues;
   applyFilters: (newFilters: SubjectFilterFormValues) => void;
 }
@@ -72,9 +73,14 @@ export const useSubjectManagement = (): Result => {
     (options?.programs || []).map((p) => ({ id: p.id, label: p.name }))
   , [options]);
 
+  const subjectOptions: Option[] = useMemo(() => 
+    (options?.subjects || []).map((s) => ({ id: s.id.toString(), label: s.name }))
+  , [options]);
+
   return {
     subjects: subjects || [],
     programOptions,
+    subjectOptions,
     filters,
     applyFilters,
   };

@@ -48,12 +48,12 @@ export function GradeManagement() {
           {!isAssigning ? (
             <>
               <Button 
-                variant="outline" 
+                className="bg-green-600 hover:bg-green-700 text-white"
                 onClick={downloadGrades}
                 disabled={isDownloading || !filters.groupId || filters.groupId === 'all'}
               >
                 <FileText className="w-4 h-4 mr-2" /> 
-                {isDownloading ? "Descargando..." : "Reportes"}
+                {isDownloading ? "Exportando..." : "Exportar"}
               </Button>
               <PermissionGuard permission={PERMISSIONS.GRADES_WRITE}>
                 <Button onClick={() => setIsAssigning(true)}>

@@ -26,25 +26,13 @@ export function GroupCreateEditPage() {
   );
 
   const { periods } = usePeriodManagement();
-  const { subjects } = useSubjectManagement();
-  const { staffList } = useStaffManagement();
+  const { subjectOptions } = useSubjectManagement();
+  const { teacherOptions } = useStaffManagement();
 
   const periodOptions = periods.map(p => ({
     label: `${p.name}${p.activeState ? ' (Activo)' : ''}`,
     id: p.id
   }));
-
-  const subjectOptions = subjects.map(s => ({
-    label: s.name,
-    id: s.id
-  }));
-
-  const teacherOptions = (staffList || [])
-    .filter(s => s.role === 'TEACHER')
-    .map(s => ({
-      label: `${s.name}`,
-      id: s.id
-    }));
 
   return (
     <div className="space-y-6 p-4 md:p-6 animate-in fade-in duration-500">
@@ -71,8 +59,8 @@ export function GroupCreateEditPage() {
         onSubmit={onSubmit}
         isLoading={isLoading}
         periodOptions={periodOptions}
-        subjectOptions={subjectOptions}
-        teacherOptions={teacherOptions}
+        subjectOptions={subjectOptions as Array<{ label: string; id: string }>}
+        teacherOptions={teacherOptions as Array<{ label: string; id: string }>}
         studentOptions={availableStudents.map(s => ({ id: s.studentInfo.id, label: `${s.studentInfo.name} ${s.studentInfo.lastname}` }))}
       />
     </div>

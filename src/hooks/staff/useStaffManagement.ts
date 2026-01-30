@@ -13,6 +13,7 @@ interface Result {
   staffList: StaffResponse[];
   programOptions: Option[];
   roleOptions: Option[];
+  teacherOptions: Option[];
   applyFilters: (newFilters: StaffFilterParams) => void;
 }
 
@@ -72,10 +73,15 @@ export const useStaffManagement = (): Result => {
     (options?.roles || []).map((r) => ({ id: r.id, label: r.name }))
   , [options]);
 
+  const teacherOptions: Option[] = useMemo(() => 
+    (options?.teachers || []).map((t) => ({ id: t.id.toString(), label: t.name }))
+  , [options]);
+
   return {
     staffList: staffList || [],
     programOptions,
     roleOptions,
+    teacherOptions,
     applyFilters,
   };
 };

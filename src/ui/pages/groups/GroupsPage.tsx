@@ -79,6 +79,33 @@ export function GroupsPage() {
         </PermissionGuard>
       </div>
 
+            {/* Estadísticas */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Estadísticas</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="text-center p-4 bg-blue-50 rounded-lg">
+              <p className="text-2xl font-bold text-blue-600">{statistics.totalGroups}</p>
+              <p className="text-sm text-gray-600">Grupos Totales</p>
+            </div>
+            <div className="text-center p-4 bg-green-50 rounded-lg">
+              <p className="text-2xl font-bold text-green-600">{statistics.uniqueSubjects}</p>
+              <p className="text-sm text-gray-600">Materias Activas</p>
+            </div>
+            <div className="text-center p-4 bg-purple-50 rounded-lg">
+              <p className="text-2xl font-bold text-purple-600">{statistics.uniqueTeachers}</p>
+              <p className="text-sm text-gray-600">Profesores</p>
+            </div>
+            <div className="text-center p-4 bg-orange-50 rounded-lg">
+              <p className="text-2xl font-bold text-orange-600">{statistics.totalSchedules}</p>
+              <p className="text-sm text-gray-600">Horarios</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Filtros */}
       <Card>
   <CardContent className="pt-6">
@@ -203,33 +230,6 @@ export function GroupsPage() {
           ))
         )}
       </div>
-
-      {/* Estadísticas */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Estadísticas</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <p className="text-2xl font-bold text-blue-600">{statistics.totalGroups}</p>
-              <p className="text-sm text-gray-600">Grupos Totales</p>
-            </div>
-            <div className="text-center p-4 bg-green-50 rounded-lg">
-              <p className="text-2xl font-bold text-green-600">{statistics.uniqueSubjects}</p>
-              <p className="text-sm text-gray-600">Materias Activas</p>
-            </div>
-            <div className="text-center p-4 bg-purple-50 rounded-lg">
-              <p className="text-2xl font-bold text-purple-600">{statistics.uniqueTeachers}</p>
-              <p className="text-sm text-gray-600">Profesores</p>
-            </div>
-            <div className="text-center p-4 bg-orange-50 rounded-lg">
-              <p className="text-2xl font-bold text-orange-600">{statistics.totalSchedules}</p>
-              <p className="text-sm text-gray-600">Horarios</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
