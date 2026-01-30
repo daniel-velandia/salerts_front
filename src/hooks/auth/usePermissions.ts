@@ -5,7 +5,10 @@ export const usePermissions = () => {
   const { user } = useAppSelector((state) => state.auth);
 
   const hasPermission = (permission: Permission): boolean => {
-    if (!user || !user.roles) return false;
+    if (!user)
+      return true;
+    else if (!user.roles)
+      return false;
 
     // Check if user has the exact permission
     if (user.roles.includes(permission)) return true;
