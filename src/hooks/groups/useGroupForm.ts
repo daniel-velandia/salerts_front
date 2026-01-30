@@ -80,17 +80,11 @@ export const useGroupForm = (
   useEffect(() => {
     if (groupToEdit) {
       // Convert the schedules from response format to input format
-      const schedules: ScheduleInput[] = groupToEdit.schedules.map((s) => {
-        // Helper to format TimeObject to string HH:mm:ss
-        const formatTime = (t: any) =>
-          `${t.hour.toString().padStart(2, '0')}:${t.minute.toString().padStart(2, '0')}:00`;
-
-        return {
-          dayOfWeek: s.day,
-          startTime: formatTime(s.startTime),
-          endTime: formatTime(s.endTime),
-        };
-      });
+      const schedules: ScheduleInput[] = groupToEdit.schedules.map((s) => ({
+        dayOfWeek: s.day,
+        startTime: s.startTime,
+        endTime: s.endTime,
+      }));
       setExistingSchedules(schedules);
     }
   }, [groupToEdit]);

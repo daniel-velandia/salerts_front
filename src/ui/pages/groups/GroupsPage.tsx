@@ -207,7 +207,7 @@ export function GroupsPage() {
                   <div className="flex flex-wrap gap-2">
                     {group.schedules.map((schedule) => (
                       <Badge key={schedule.id} variant="secondary" className="px-3 py-1">
-                        {DAYS_ES[schedule.day]} {(schedule.startTime.hour || 0).toString().padStart(2, '0')}:{(schedule.startTime.minute || 0).toString().padStart(2, '0')} - {(schedule.endTime.hour || 0).toString().padStart(2, '0')}:{(schedule.endTime.minute || 0).toString().padStart(2, '0')}
+                        {DAYS_ES[schedule.day]} {schedule.startTime.substring(0, 5)} - {schedule.endTime.substring(0, 5)}
                       </Badge>
                     ))}
                   </div>

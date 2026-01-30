@@ -10,8 +10,8 @@ export type DayOfWeek = 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDA
 export interface Schedule {
   id: string;
   day: DayOfWeek;
-  startTime: TimeObject;
-  endTime: TimeObject;
+  startTime: string;
+  endTime: string;
 }
 
 export interface ScheduleInput {

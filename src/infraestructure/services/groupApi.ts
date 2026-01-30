@@ -7,8 +7,8 @@ import type { ScheduleInput, DayOfWeek } from "@/domain/models/Schedule";
 interface ScheduleBackend {
   id: string;
   day: DayOfWeek;
-  startTime: { hour: number; minute: number; second: number; nano: number };
-  endTime: { hour: number; minute: number; second: number; nano: number };
+  startTime: string;
+  endTime: string;
 }
 
 interface StudentInGroupBackend {
