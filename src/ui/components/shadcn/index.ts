@@ -15,3 +15,4 @@ export * from "./spinner";
 export * from "./spinner";
 export * from "./tooltip";
 export * from "./tabs";
+export * from "./dropdown-menu";

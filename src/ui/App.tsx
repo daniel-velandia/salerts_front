@@ -17,6 +17,7 @@ import { ProgramsPage } from "./pages/programs/ProgramsPage";
 import { ConfigurationPage } from "./pages/configuration/ConfigurationPage";
 import { GroupsPage } from "./pages/groups/GroupsPage";
 import { GroupCreateEditPage } from "./pages/groups/GroupCreateEditPage";
+import { ProfilePage } from "./pages/user/ProfilePage";
 
 function App() {
   return (
@@ -55,6 +56,7 @@ function App() {
               <Route path="/groups/new" element={<GroupCreateEditPage />} />
               <Route path="/groups/edit/:id" element={<GroupCreateEditPage />} />
               <Route path="/configuration" element={<ConfigurationPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
             </Route>
           </Route>
 
